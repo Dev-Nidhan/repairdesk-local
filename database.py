@@ -110,14 +110,9 @@ def utc_now() -> str:
 
 
 class Database:
-    def __init__(self, path: str | Path, *, read_only: bool = False) -> None:
+    def __init__(self, path: str | Path) -> None:
         self.path = Path(path)
-        self.read_only = read_only
-        if read_only:
-            if not self.path.is_file():
-                raise FileNotFoundError(f"Read-only database does not exist: {self.path}")
-        else:
-            self.init()
+        self.init()
 
     def init(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -127,15 +122,10 @@ class Database:
 
     @contextmanager
     def connection(self):
-        if self.read_only:
-            uri = f"{self.path.resolve().as_uri()}?mode=ro"
-            conn = sqlite3.connect(uri, uri=True)
-        else:
-            conn = sqlite3.connect(self.path)
+        conn = sqlite3.connect(self.path)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
-        if not self.read_only:
-            conn.execute("PRAGMA journal_mode = WAL")
+        conn.execute("PRAGMA journal_mode = WAL")
         try:
             yield conn
             conn.commit()
