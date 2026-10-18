@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: repairdesk-local-demo
+    runtime: docker
+    plan: 4c-8g
+    autoDeploy: false
+    healthCheckPath: /_stcore/health
+    disk:
+      name: gemma-models
+      mountPath: /var/data
+      sizeGB: 10
+    envVars:
+      - key: OLLAMA_BASE_URL
+        value: http://127.0.0.1:11434
+      - key: OLLAMA_MODEL
+        value: gemma3:4b
+      - key: OLLAMA_MODELS
+        value: /var/data/ollama
+      - key: REPAIRDESK_DEMO_AI
+        value: "true"
+      - key: PYTHONUNBUFFERED
+        value: "1"

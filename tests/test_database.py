@@ -172,6 +172,29 @@ def test_demo_data_is_explicit_and_has_no_fake_analysis(db):
     assert priced["total_cents"] == 12400
 
 
+def test_read_only_database_rejects_writes_and_preserves_fixture(db):
+    from sqlite3 import OperationalError
+
+    from database import Database
+
+    load_demo_data(db)
+    read_only_db = Database(db.path, read_only=True)
+    before = read_only_db.search()
+
+    with pytest.raises(OperationalError, match="readonly"):
+        read_only_db.create_job(
+            {
+                "device_category": "phone",
+                "customer_reference": "DEMO-9001",
+                "brand": "Example",
+                "model": "Sample",
+                "complaint": "Fictional read-only test record.",
+            }
+        )
+
+    assert read_only_db.search() == before
+
+
 def test_unknown_status_rejected(db, job_fields):
     job_id = db.create_job(job_fields)
     with pytest.raises(ValueError, match="Unknown status"):

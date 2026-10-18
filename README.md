@@ -14,6 +14,45 @@ The screenshots and short, silent walkthrough use only fictional sample records.
 
 [Watch the short demonstration video](docs/demo/RepairDesk-Local-Demo.mp4).
 
+### Public Render demo
+
+The public demo is a separate, read-only Streamlit app with a dedicated SQLite
+fixture containing only fictional jobs. Its optional Gemma 3 4B intake analysis
+runs in Ollama inside the same Render service. It accepts no user-entered
+records, does not change the sample data, and does not save model output. The
+full local installation below remains the private shop workflow.
+
+The Blueprint uses a paid 4-CPU/8-GB Render web service and a 10-GB persistent
+disk for the model. Render listed this compute plan at $175/month on October
+19, 2026; disk is billed separately. At continuous runtime, six days of
+compute is about $35 before disk and other charges. The service does not sleep
+while idle. Creating it starts billing. Claim and verify any Render credits
+before creating the service, check the current [Render pricing](https://render.com/pricing),
+and manually suspend the service within six days of its first billable start
+to stay within a $50 credit budget. The Blueprint cannot enforce a dollar cap,
+and Render may bill a payment method if the credit is exhausted. Hacktoberfest
+credit claims are managed through the
+[Hacktoberfest account page](https://hacktoberfest.com/my).
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Dev-Nidhan/repairdesk-local)
+
+To preview the read-only showcase locally, generate its fictional fixture and
+start the app:
+
+```powershell
+python prepare_demo.py
+streamlit run demo_app.py
+```
+
+Hosted AI is off by default for this local preview. To test it with a local
+Ollama instance, set `REPAIRDESK_DEMO_AI=true` before starting Streamlit.
+
+On its first start, the container downloads `gemma3:4b` to the persistent disk;
+later restarts reuse that download. The demo only analyzes one of its fictional
+sample records. The selected record's device and complaint details are sent to
+Ollama running on the Render host. Never enter real customer information in
+this public site.
+
 ## Features
 
 - Track repair jobs from intake through inspection, work in progress, and completion.
@@ -121,6 +160,22 @@ flowchart LR
 
 The normal record and estimate workflow is deterministic Python backed by SQLite. When asked, `ai_service.py` sends device details and the reported complaint to the configured local Ollama endpoint. It deliberately omits the customer name and reference; customer and technician text is treated as untrusted input. The response is validated against Pydantic schemas before it can be saved. Model suggestions remain explicitly unconfirmed and cannot set a price, approve work, or send a message. A customer update can instead be built from the record without using a model. In every case, a person reviews and shares the text outside the app.
 
+The Render showcase is a separate, read-only path:
+
+```mermaid
+flowchart LR
+    Visitor[Visitor] --> Demo[Read-only Streamlit showcase on Render]
+    Demo -->|SELECT only| Fixture[(Fictional SQLite fixture)]
+    Demo -->|Optional selected sample; no customer name/reference| Ollama[Ollama + Gemma 3 4B on same Render service]
+    Ollama -->|Schema-validated, unconfirmed result| Demo
+    Demo -->|Nothing is saved| Visitor
+```
+
+The hosted page has no intake fields or mutation controls. AI results are
+generated only for the selected fictional sample and are not stored. This
+public, paid deployment is for evaluation; for real customer records, use the
+local installation and keep Ollama on a machine you control.
+
 ## Run the app
 
 ```powershell
@@ -171,6 +226,10 @@ The test suite uses temporary SQLite databases and does not call a live Ollama m
 | `estimates.py` | Estimate line parsing and price calculations |
 | `customer_updates.py` | Record-based customer update templates and safeguards |
 | `demo_data.py` | Explicitly loaded fictional sample jobs |
+| `demo_app.py` | Separate read-only hosted showcase with optional sample-only AI |
+| `prepare_demo.py` | Creates the fictional showcase fixture during image build |
+| `Dockerfile`, `start_demo.sh` | Container image and Ollama/Streamlit startup |
+| `render.yaml` | Paid Render Blueprint with persistent model storage |
 | `requirements.txt` | Python package dependencies |
 | `tests/` | Unit and database tests |
 
