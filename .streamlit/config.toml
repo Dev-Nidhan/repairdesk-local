@@ -1,0 +1,25 @@
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "viewer"
+
+[server]
+address = "127.0.0.1"
+
+[theme]
+base = "light"
+primaryColor = "#0f766e"
+backgroundColor = "#f3f5f7"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#122033"
+borderColor = "#e3e8ee"
+baseRadius = "0.6rem"
+font = "sans serif"
+
+[theme.sidebar]
+backgroundColor = "#121C45"
+secondaryBackgroundColor = "#162670"
+textColor = "#f4f7fb"
+primaryColor = "#ffffff"
+borderColor = "#20317f"
