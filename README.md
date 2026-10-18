@@ -12,7 +12,7 @@ The screenshots and short, silent walkthrough use only fictional sample records.
 
 ![RepairDesk estimates with fictional sample records](docs/screenshots/estimates.png)
 
-[Watch the short demonstration video](docs/demo/repairdesk-local-demo.webm).
+[Watch the short demonstration video](docs/demo/RepairDesk-Local-Demo.mp4).
 
 ## Features
 
